@@ -1,5 +1,8 @@
 import { areRectsOverlapping } from "./checkCollision";
 import { Particle } from "./particle";
+import { buildCircleStrategy } from "./strategies/circleStrategy";
+import { buildDiagonalStrategy } from "./strategies/diagonalStrategy";
+import { buildSimpleUpDownStrategy } from "./strategies/simpleUpDownStrategy";
 import "./style.css";
 import { Vacuum } from "./vaccum";
 
@@ -19,7 +22,22 @@ document.body.appendChild(canvas);
 
 const ctx = canvas.getContext("2d")!;
 
-const vac = new Vacuum();
+const levels = [
+  buildSimpleUpDownStrategy(10),
+  buildSimpleUpDownStrategy(15),
+  buildSimpleUpDownStrategy(25),
+  buildCircleStrategy(10),
+  buildCircleStrategy(15),
+  buildCircleStrategy(25),
+  buildDiagonalStrategy(10),
+  buildDiagonalStrategy(15),
+  buildDiagonalStrategy(25),
+];
+
+let level = 0;
+
+const vac = new Vacuum(levels[level]);
+vac.movementStrategy.init(vac);
 
 let particles = Array(10)
   .fill(0)
@@ -27,6 +45,13 @@ let particles = Array(10)
 
 function loop() {
   ctx.clearRect(0, 0, width, height);
+
+  ctx.fillStyle = "white";
+  ctx.strokeStyle = "none";
+
+  ctx.font = "30px Arial";
+
+  ctx.fillText(`Level ${level}`, 50, 50);
 
   vac.update();
 
@@ -53,7 +78,11 @@ function loop() {
       .fill(0)
       .map(() => new Particle());
 
-    vac.velocity += 3;
+    const nextLevel = levels[++level];
+    if (nextLevel) {
+      vac.movementStrategy = nextLevel;
+      vac.movementStrategy.init(vac);
+    }
   }
 
   for (const p of particles) p.paint(ctx);
