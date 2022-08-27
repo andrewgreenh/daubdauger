@@ -11,7 +11,7 @@ export class Vacuum {
       if (e.key === "Enter" || e.key === " ")
         this.movementStrategy.handleInput(this);
     });
-    document.addEventListener("click", () =>
+    document.addEventListener("pointerdown", () =>
       this.movementStrategy.handleInput(this)
     );
   }
